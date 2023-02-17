@@ -1,0 +1,12 @@
+target/
+*.csv
+*.data
+*.egg-info
+*.venv
+pictures/
+**/__pycache__
+.vscode
+.mypy_cache
+
+wandb/
+output/

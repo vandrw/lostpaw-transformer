@@ -1,0 +1,66 @@
+program: scripts/train.py
+method: bayes
+metric:
+  name: accuracy
+  goal: maximize
+# early_terminate:
+#   type: hyperband
+#   min_iter: 3
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - ${args}
+parameters:
+  use_tqdm:
+    distribution: constant
+    value: True
+  use_wandb:
+    distribution: constant
+    value: True
+  epochs:
+    distribution: constant
+    value: 30
+  batch_size:
+    distribution: constant
+    value: 8
+  test_batch_size:
+    distribution: constant
+    value: 8
+  test_batch_count:
+    distribution: constant
+    value: 16
+  save_model_every:
+    distribution: constant
+    value: 50
+  early_stopping_epochs:
+    distribution: constant
+    value: 15
+  batches_per_epoch:
+    distribution: constant
+    value: 128
+  cross_validiton_k_fold:
+    distribution: constant
+    value: 1
+  optimizer:
+    distribution: constant
+    value: "adamw"
+  latent_space_size:
+    distribution: constant
+    value: 512
+  contrastive_epsilon:
+    distribution: constant
+    value: 1.0e-8
+  optimizer_params.weight_decay:
+    distribution: constant
+    value: 2.0e-4
+  similarity_probability:
+    distribution: constant
+    value: 0.5
+  optimizer_params.lr:
+    distribution: categorical
+    values: [0.0001, 0.00005]
+  contrastive_margin:
+    distribution: constant
+    value: 1.66
+

@@ -1,0 +1,29 @@
+# Data and Model
+info_path: "output/data/train.data"
+model_path: "output/models"
+similarity_probability: 0.35
+batches_per_epoch: 128
+
+# Logging
+use_wandb: False
+use_tqdm: True
+
+# Model Hyperparameters
+epochs: 15
+latent_space_size: 512
+batch_size: 4
+test_batch_size: 4
+test_batch_count: 8
+save_model_every: 50
+early_stopping_epochs: 15
+cross_validiton_k_fold: 1
+
+# Optimizer
+optimizer: "adamw"
+optimizer_params: 
+  lr: 0.1
+  weight_decay: 4.0e-2
+
+# Contrastive loss
+contrastive_margin: 0.9
+contrastive_epsilon: 1.0e-8

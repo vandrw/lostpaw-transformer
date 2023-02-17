@@ -1,0 +1,2 @@
+[workspace]
+members = ["data-scraper/aap-scraper", "webapp/backend"]

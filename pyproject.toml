@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "htsm-pet-finder"
+version = "0.0.1"
+dependencies = [
+    "torch",
+    "numpy",
+    "pandas",
+    "transformers",
+    "timm",
+    "wandb",
+    "tqdm",
+    "pillow",
+]
+
+[project.scripts]
+
+[tool.setuptools_scm]
+
+[tool.setuptools.packages.find]
+where = ["."]  # ["."] by default
+include = ["lostpaw*"]  # ["*"] by default
+exclude = []  # empty by default
+# namespaces = true  # true by default
+
+[[tool.mypy.overrides]]
+module = ["transformers.*", "torchvision.*"]
+ignore_missing_imports = true

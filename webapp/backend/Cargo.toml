@@ -1,0 +1,22 @@
+[package]
+name = "lostpaw-backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.66"
+axum = "0.6.1"
+axum-macros = "0.3.0"
+axum-sessions = "0.4.1"
+dashmap = "5.4.0"
+numpy = "0.17.2"
+openidconnect = "2.4.0"
+pyo3 = { version = "0.17.3", features = ["auto-initialize"] }
+rand = "0.8.5"
+rand_distr = "0.4.3"
+serde = { version = "1.0.150", features = ["derive"] }
+serde_json = "1.0.91"
+tokio = { version = "1.0", features = ["full"] }
+tower-http = { version = "0.3.5", features = ["cors", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

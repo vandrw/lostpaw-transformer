@@ -1,0 +1,156 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: htsm-pet-finder
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pytorch-ssh-deployment
+  namespace: htsm-pet-finder
+  labels:
+    app.kubernetes.io/name: htsm-pet-finder-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: htsm-pet-finder-dev
+  template:
+    metadata:
+      name: pytorch-ssh
+      namespace: htsm-pet-finder
+      labels:
+        app.kubernetes.io/name: htsm-pet-finder-dev
+    spec:
+      restartPolicy: Always
+      # serviceAccountName: lostpaw-dev-container-admin
+      volumes:
+      - name: data-vol
+        persistentVolumeClaim:
+          claimName: htsm-pet-finder-data-folder
+      - name: home-vol
+        persistentVolumeClaim:
+          claimName: htsm-pet-finder-home-folder
+      containers:
+      - name: pytorch-ssh
+        image: "docker.io/klotzambein/pytorch-ssh:latest"
+        imagePullPolicy: Never
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        volumeMounts:
+          - name: data-vol
+            mountPath: /var/run/data
+          - name: home-vol
+            mountPath: /root
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: htsm-pytorch-ssh
+  namespace: htsm-pet-finder
+spec:
+  selector:
+    app.kubernetes.io/name: htsm-pet-finder-dev
+  ports:
+    - protocol: TCP
+      port: 22
+      targetPort: 22
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+  2227: "htsm-pet-finder/htsm-pytorch-ssh:22"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: htsm-pet-finder-data-folder
+spec:
+  capacity:
+    storage: 50Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /mnt/sda6/pet-finder-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - home-server # must be the name of your node (kubectl get nodes)
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: htsm-pet-finder-home-folder
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /mnt/sda6/pet-finder-home
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - home-server # must be the name of your node (kubectl get nodes)
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: htsm-pet-finder
+  name: htsm-pet-finder-data-folder
+spec:
+  storageClassName: manual
+  accessModes: ["ReadWriteOnce"]
+  volumeName: htsm-pet-finder-data-folder
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: htsm-pet-finder
+  name: htsm-pet-finder-home-folder
+spec:
+  storageClassName: manual
+  accessModes: ["ReadWriteOnce"]
+  volumeName: htsm-pet-finder-home-folder
+  resources:
+    requests:
+      storage: 10Gi
+# ---
+# kind: ClusterRoleBinding
+# apiVersion: rbac.authorization.k8s.io/v1
+# metadata:
+#   name: lostpaw-dev-container-admin
+# subjects:
+# - kind: ServiceAccount
+#   name: lostpaw-dev-container-admin
+#   namespace: htsm-pet-finder
+# roleRef:
+#   kind: ClusterRole
+#   name: cluster-admin
+#   apiGroup: rbac.authorization.k8s.io
+# ---
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: lostpaw-dev-container-admin

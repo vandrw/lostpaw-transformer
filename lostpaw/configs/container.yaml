@@ -1,0 +1,36 @@
+# Data and Model
+# info_path: "/var/run/data/annotated02/train.data"
+# model_path: "/var/run/data/models/"
+
+info_path: "/var/run/data/annotated02/test.data"
+model_path: "/var/run/data/models"
+# run_name: "2023_01_08_202350 kfold-2of3"
+# run_name: "frozen_vit_Feb11"
+run_name: "frozen_vit_Feb11 kfold-2of3"
+
+similarity_probability: 0.5
+
+# Logging
+use_wandb: True
+use_tqdm: True
+
+# Model Hyperparameters
+epochs: 350
+latent_space_size: 512
+batch_size: 8
+test_batch_size: 8
+test_batch_count: 128
+save_model_every: 50
+early_stopping_epochs: 350
+batches_per_epoch: 128
+cross_validiton_k_fold: 1
+
+# Optimizer
+optimizer: "adamw"
+optimizer_params: 
+  lr: 5.0e-5
+  weight_decay: 2.0e-4
+
+# Contrastive loss
+contrastive_margin: 1.66
+contrastive_epsilon: 1.0e-8
