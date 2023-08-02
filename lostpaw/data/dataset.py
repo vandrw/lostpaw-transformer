@@ -125,7 +125,7 @@ class RandomPairDataset(Dataset):
         image_paths_of_pet: List[List[str]] = self.pets.iloc[idx]["paths"]
         if is_same:
             if len(image_paths_of_pet) == 1:
-                raise RuntimeError("Should never happen, filtered out by robin.")
+                raise RuntimeError("There is only one image for this pet. Please ensure there are at least 2 images per pet.")
                 # idx_1, idx_2 = random.sample(range(len(image_paths_of_pet[0])), 2)
                 # img_path1 = image_paths_of_pet[0][idx_1]
                 # img_path2 = image_paths_of_pet[0][idx_2]

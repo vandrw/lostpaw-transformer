@@ -1,7 +1,7 @@
 from pathlib import Path
 from pprint import pprint
 import shutil
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from PIL import Image
 from PIL.Image import Image as ImageT
 import pandas as pd
@@ -11,7 +11,7 @@ from lostpaw.data.extract_pets import lookup_next_image_name
 
 
 class PetImagesFolder:
-    sources: List[str] = []
+    sources: Optional[List[str]] = []
     paths: List[List[str]] = []
     pet_ids: List[int] = []
     folder: Path
@@ -26,17 +26,23 @@ class PetImagesFolder:
         df = pd.read_json(self.info_file, lines=True)
 
         if len(df) > 0:
-            self.sources = df["source"].tolist()
+            if "source" in df.columns:
+                self.sources = df["source"].tolist()
+            else:
+                self.sources = None
+
             self.paths = df["paths"].tolist()
             self.pet_ids = df["pet_id"].tolist()
 
     def __len__(self) -> int:
         id_len = len(self.pet_ids)
-        assert len(self.sources) == len(self.paths) == id_len
+        assert len(self.paths) == id_len
+        if self.sources:
+            assert len(self.sources) == id_len
         return id_len
 
     def __getitem__(self, idx) -> Tuple[List[Tuple[ImageT, Path]], int]:
-        paths, pet_id, source = self.get_record(idx)
+        paths, pet_id, _ = self.get_record(idx)
         images = []
         for image_path in paths:
             image = Image.open(image_path).convert("RGB")
@@ -45,7 +51,9 @@ class PetImagesFolder:
         return images, pet_id
 
     def data_frame(self) -> pd.DataFrame:
-        data = dict(source=self.sources, paths=self.paths, pet_id=self.pet_ids)
+        data = dict(paths=self.paths, pet_id=self.pet_ids)
+        if self.sources:
+            data["source"] = self.sources
         return pd.DataFrame(data)
 
     def save_info(self):
@@ -53,14 +61,14 @@ class PetImagesFolder:
         df.to_json(self.info_file, orient="records", lines=True, default_handler=str)
 
     def get_record(self, idx: int) -> Tuple[List[Path], int, str]:
-        return (
-            [
-                Path(p) if Path(p).is_absolute else self.image_folder / Path(p)
-                for p in self.paths[idx]
-            ],
-            int(self.pet_ids[idx]),
-            str(self.sources[idx]),
-        )
+        paths = [
+            Path(p) if Path(p).is_absolute else self.image_folder / Path(p)
+            for p in self.paths[idx]
+        ]
+        pet_id = int(self.pet_ids[idx])
+
+        source = str(self.sources[idx]) if self.sources else None
+        return (paths, pet_id, source)
 
     def add_record(
         self, images: List[Union[ImageT, Path]], pet_id: int, source: str = ""
@@ -78,7 +86,8 @@ class PetImagesFolder:
                 raise ValueError(f"invalid image type given: {type(image)}")
             paths.append(str(image_path))
 
-        self.sources.append(source)
+        if self.sources:
+            self.sources.append(source)
         self.paths.append(paths)
         self.pet_ids.append(pet_id)
 
